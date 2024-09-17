@@ -6,4 +6,4 @@ This repository doesn't have keys, it should be used as a reference instead.
 
 Tool that's going to automatically decrypt, replace xuid then reencrypt for you.<br>
 Wouldn't be possible without the work of @Doliman100.<br>
-Link to his Crypto Tool repository on which this tool is based on: https://github.com/Doliman100/ForzaTech-encryption-tool
+Link to his Crypto Tool repository on which this tool is based on: [link](https://github.com/Doliman100/ForzaTech-encryption-tool)

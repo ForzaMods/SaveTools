@@ -8,8 +8,9 @@ namespace forza_saveswapper {
 
     class CBinaryStream {
     public:
-        explicit CBinaryStream(const std::shared_ptr<std::iostream>& stream)
-            : m_Stream(stream) {}
+        explicit CBinaryStream(const std::shared_ptr<std::iostream>& stream) : m_Stream(stream) {
+
+        }
 
         template <typename T>
         T Read() {

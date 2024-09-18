@@ -6,74 +6,74 @@
 #define GUI_HPP
 
 #include "Application.hpp"
-#include "../fileUtilities/TFileOpenResult.hpp"
 
 #include <memory>
 #include <d3d11.h>
 
 namespace forza_saveswapper {
 
-class Window
-{
-public:
-    static constexpr int WIDTH = 320;
-    static constexpr int HEIGHT = 170;
+    class Window
+    {
+    public:
+        static constexpr int WIDTH = 320;
+        static constexpr int HEIGHT = 170;
 
-    explicit Window(Application& application, std::string  name);
+        explicit Window(Application& application, std::string  name);
 
-    bool Initialize();
-    void Cleanup();
+        bool Initialize();
+        void Cleanup();
 
-    void BeginRender() noexcept;
-    void EndRender() const noexcept;
-    void Render() noexcept;
-    void ResetDevice() const noexcept;
+        void BeginRender() noexcept;
+        void EndRender() const noexcept;
+        void Render() noexcept;
+        void ResetDevice() const noexcept;
 
-    [[nodiscard]] IDXGISwapChain* GetSwapchain() const {
-        return m_SwapChain;
-    }
+        [[nodiscard]] IDXGISwapChain* GetSwapchain() const {
+            return m_SwapChain;
+        }
 
-    [[nodiscard]] POINTS GetPosition() const {
-        return m_Position;
-    }
+        [[nodiscard]] POINTS GetPosition() const {
+            return m_Position;
+        }
 
-    void SetPosition(const POINTS newValue) {
-        m_Position = newValue;
-    }
+        void SetPosition(const POINTS newValue) {
+            m_Position = newValue;
+        }
 
-    [[nodiscard]] HWND GetWindow() const {
-        return m_Window;
-    }
+        [[nodiscard]] HWND GetWindow() const {
+            return m_Window;
+        }
 
-    [[nodiscard]] bool GetIsRunning() const {
-        return m_IsRunning;
-    }
+        [[nodiscard]] bool GetIsRunning() const {
+            return m_IsRunning;
+        }
 
-private:
-    void CreateDevice() noexcept;
-    void DestroyDevice() const noexcept;
-    void CreateImGui() const noexcept;
+    private:
+        void CreateDevice() noexcept;
+        void DestroyDevice() const noexcept;
+        void CreateImGui() const noexcept;
 
-    static void DestroyImGui() noexcept;
+        static void DestroyImGui() noexcept;
 
-    void OpenSave();
-    void SwapSave(uint64_t newXuid) const;
+        void OpenSave();
+        void SwapSave(uint64_t newXuid) const;
 
-private:
-    HWND m_Window;
-    WNDCLASSEX m_WindowClass{};
-    POINTS m_Position{};
+    private:
+        HWND m_Window;
+        WNDCLASSEX m_WindowClass{};
+        POINTS m_Position{};
 
-    ID3D11Device* m_Device;
-    ID3D11DeviceContext* m_DeviceContext;
-    IDXGISwapChain* m_SwapChain;
+        ID3D11Device* m_Device;
+        ID3D11DeviceContext* m_DeviceContext;
+        IDXGISwapChain* m_SwapChain;
 
-    Application& m_Application;
-    std::string m_Name;
-    bool m_IsRunning;
+        Application& m_Application;
+        std::string m_Name;
+        bool m_IsRunning;
 
-    TFileOpenResult m_FileOpenReuslt;
-};
+        std::string m_OpenSavePath;
+        std::string m_OpenSaveFilename;
+    };
 
 } // forza_saveswapper
 

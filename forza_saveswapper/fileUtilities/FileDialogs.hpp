@@ -4,11 +4,14 @@
 
 #ifndef FILEDIALOGS_HPP
 #define FILEDIALOGS_HPP
+
 #include "TFileOpenResult.hpp"
+#include "TFileSaveResult.hpp"
 
 namespace forza_saveswapper::FileDialogs {
 
     TFileOpenResult OpenFile();
+    TFileSaveResult SaveFile();
 
 } // forza_saveswapper
 

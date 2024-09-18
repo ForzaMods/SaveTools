@@ -3,23 +3,22 @@
 //
 
 #include "Window.hpp"
-#include "../fileUtilities/FileDialogs.hpp"
-#include "../swapper./CBinaryStream.hpp"
-#include "../encryption/streams/CFh3Stream.hpp"
 
-#include <imgui_internal.h>
-#include <iostream>
+#include "../fileUtilities/FileDialogs.hpp"
+#include "../encryption/streams/CFh3Stream.hpp"
+#include "../swapper/CBinaryStream.hpp"
+#include "../swapper/CCompileTimeHash.hpp"
+#include "../swapper/CRuntimeHash.hpp"
+
 #include <thread>
 #include <utility>
 #include <filesystem>
 #include <fstream>
-
-#include <backends/imgui_impl_dx11.h>
-#include <backends/imgui_impl_win32.h>
 #include <winuser.h>
 
-#include "../swapper/CCompileTimeHash.hpp"
-#include "../swapper/CRuntimeHash.hpp"
+#include <imgui_internal.h>
+#include <backends/imgui_impl_dx11.h>
+#include <backends/imgui_impl_win32.h>
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(
     HWND window,
@@ -115,10 +114,12 @@ namespace forza_saveswapper {
           m_Application(application),
           m_Name (std::move(name)),
           m_IsRunning(true) {
-        m_FileOpenReuslt.SelectedFileName = "No save file picked!";
+        m_OpenSaveFilename = "No save file picked!";
     }
 
     bool Window::Initialize() {
+        constexpr auto className = "class001";
+
         m_WindowClass.cbSize = sizeof(WNDCLASSEX);
         m_WindowClass.style = CS_CLASSDC;
         m_WindowClass.lpfnWndProc = WindowProcess;
@@ -129,13 +130,13 @@ namespace forza_saveswapper {
         m_WindowClass.hCursor = nullptr;
         m_WindowClass.hbrBackground = nullptr;
         m_WindowClass.lpszMenuName = nullptr;
-        m_WindowClass.lpszClassName = "class001";
+        m_WindowClass.lpszClassName = className;
         m_WindowClass.hIconSm = nullptr;
 
         RegisterClassEx(&m_WindowClass);
         m_Window = CreateWindowEx(
             0,
-            "class001",
+            className,
             m_Name.c_str(),
             WS_POPUP,
             100,
@@ -258,19 +259,23 @@ namespace forza_saveswapper {
     }
 
     void Window::OpenSave() {
-        m_FileOpenReuslt = FileDialogs::OpenFile();
-        if (!m_FileOpenReuslt.Succeeded) {
+        const auto openResult = FileDialogs::OpenFile();
+        if (!openResult.Succeeded) {
             MessageBoxA(nullptr, "The save file opening failed!", "Error", MB_ICONERROR);
+            return;
         }
+
+        m_OpenSavePath = openResult.Path;
+        m_OpenSaveFilename = openResult.SelectedFileName;
     }
 
     void Window::SwapSave(const uint64_t newXuid) const {
-        if (!m_FileOpenReuslt.Succeeded) {
+        if (m_OpenSavePath.empty()) {
             MessageBoxA(nullptr, "The file open must succeed first!", "Error", MB_ICONERROR);
             return;
         }
 
-        const std::filesystem::path inputPath(m_FileOpenReuslt.Path);
+        const std::filesystem::path inputPath(m_OpenSavePath);
         if (!exists(inputPath)) {
             MessageBoxA(nullptr, "The input save doesn't exist anymore!", "Error", MB_ICONERROR);
             return;
@@ -323,15 +328,15 @@ namespace forza_saveswapper {
         const auto es = std::make_unique<CFh3EncryptionStream>(*output2, input_size, std::array<uint8_t, 16>{ }, s_Contexts[0]);
         es->WriteData(*output);
 
-        std::ofstream file(m_FileOpenReuslt.SelectedFileName, std::ios::binary);
+        const auto fileSaveRes = FileDialogs::SaveFile();
+        std::ofstream file(fileSaveRes.Path, std::ios::binary);
         if (!file) {
             MessageBoxA(nullptr, "Failed to open output file!", "Error", MB_ICONERROR);
             return;
         }
 
         std::string contents = output2->str();
-        file.write(contents.c_str(), contents.size());
-
+        file.write(contents.c_str(), static_cast<std::streamsize>(contents.size()));
         if (file.fail()) {
             MessageBoxA(nullptr, "Failed to write to output file!", "Error", MB_ICONERROR);
             return;
@@ -403,13 +408,13 @@ namespace forza_saveswapper {
         const auto buttonWidth = ImVec2(ImGui::GetContentRegionAvail().x, 0);
 
         ImGui::Text("Open save: ");
-        if (ImGui::Button(m_FileOpenReuslt.SelectedFileName.c_str(), buttonWidth)) {
+        if (ImGui::Button(m_OpenSaveFilename.c_str(), buttonWidth)) {
             OpenSave();
         }
 
         static uint64_t xuid = 0;
 
-        ImGui::Text("Enter XUID");
+        ImGui::Text("Enter XUID (In hex)");
         ImGui::InputScalar("##xuid", ImGuiDataType_U64, &xuid, nullptr, nullptr, "%016llX");
         ImGui::SameLine();
         if (ImGui::Button("Grab XUID", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
@@ -423,7 +428,7 @@ namespace forza_saveswapper {
             );
         }
 
-        if (ImGui::Button("Swap!", buttonWidth)) {
+        if (ImGui::Button("Export", buttonWidth)) {
             SwapSave(xuid);
         }
         ImGui::End();

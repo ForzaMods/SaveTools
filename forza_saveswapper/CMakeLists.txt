@@ -67,6 +67,8 @@ add_executable(forza_saveswapper
         encryption/keys/Fh4Keys.cpp
         encryption/keys/Fh4Keys.hpp
         encryption/keys/Fh5Keys.hpp
+        fileUtilities/TFileSaveResult.hpp
+        fileUtilities/TFileSaveResult.hpp
 )
 
 target_link_libraries(forza_saveswapper PRIVATE

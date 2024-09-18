@@ -10,22 +10,22 @@
 
 namespace forza_saveswapper {
 
-class Window;
+    class Window;
 
-class Application {
-public:
-    explicit Application(const std::string& windowName);
-    ~Application();
+    class Application {
+    public:
+        explicit Application(const std::string& windowName);
+        ~Application();
 
-    void Run() const;
+        void Run() const;
 
-private:
-    void Loop() const;
+    private:
+        void Loop() const;
 
-private:
-    std::string m_WindowName;
-    std::unique_ptr<Window> m_Window;
-};
+    private:
+        std::string m_WindowName;
+        std::unique_ptr<Window> m_Window;
+    };
 
 } // forza_saveswapper
 
